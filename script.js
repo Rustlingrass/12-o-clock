@@ -12,6 +12,10 @@ const pointLight = new THREE.PointLight(0xffffff, 2, 100);
 pointLight.position.set(0, 0, 0);
 scene.add(pointLight);
 
+// Add ambient light to brighten the entire scene
+const ambientLight = new THREE.AmbientLight(0x404040, 2); // Adjust the intensity as needed
+scene.add(ambientLight);
+
 // Create Sun
 const sunGeometry = new THREE.SphereGeometry(2, 32, 32);
 const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
@@ -60,6 +64,9 @@ function animate() {
     obj.planet.position.z = obj.distance * Math.sin(obj.angle);
   });
 
+  // Update controls
+  controls.update();
+
   // Render the scene
   renderer.render(scene, camera);
 }
@@ -71,4 +78,8 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
 });
 
+// Add user control for camera rotation, zoom, and pan
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+// Start animation
 animate();
