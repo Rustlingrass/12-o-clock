@@ -149,5 +149,38 @@ if (event.deltaY < 0) {
 
 updateCameraPosition();  // Update camera position after zooming
 });
+
+// Handle mouse drag to rotate the camera
+let isDragging = false;
+let previousMouseX = 0;
+let previousMouseY = 0;
+
+const dragSpeed = 0.005;  // Adjust drag speed for rotation
+
+document.addEventListener('mousedown', (event) => {
+  isDragging = true;
+  previousMouseX = event.clientX;
+  previousMouseY = event.clientY;
+});
+
+document.addEventListener('mousemove', (event) => {
+  if (isDragging) {
+    const deltaX = event.clientX - previousMouseX;
+    const deltaY = event.clientY - previousMouseY;
+
+    cameraAngleX -= deltaX * dragSpeed;
+    cameraAngleY = Math.max(Math.min(cameraAngleY + deltaY * dragSpeed, Math.PI / 2), -Math.PI / 2);  // Limit vertical movement
+
+    previousMouseX = event.clientX;
+    previousMouseY = event.clientY;
+
+    updateCameraPosition();
+  }
+});
+
+document.addEventListener('mouseup', () => {
+  isDragging = false;
+});
+
 // Start animation
 animate();
