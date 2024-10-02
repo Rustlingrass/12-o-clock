@@ -6,11 +6,14 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.getElementById('solar-system').appendChild(renderer.domElement);
-
 // Add lights to simulate the Sun
 const pointLight = new THREE.PointLight(0xffffff, 2, 100);
 pointLight.position.set(0, 0, 0);
 scene.add(pointLight);
+
+// Add ambient light to brighten the entire scene
+const ambientLight = new THREE.AmbientLight(0x404040, 2); // Adjust the intensity as needed
+scene.add(ambientLight);
 
 // Create Sun
 const sunGeometry = new THREE.SphereGeometry(2, 32, 32);
@@ -43,8 +46,48 @@ createPlanet(1.1, 25, 0xff6600); // Saturn
 createPlanet(0.9, 30, 0x33ccff); // Uranus
 createPlanet(0.8, 35, 0x3366ff); // Neptune
 
-// Set the camera position
-camera.position.z = 50;
+// Create starfield (sky full of stars)
+function createStarfield() {
+  const starsGeometry = new THREE.BufferGeometry();
+  const starCount = 10000;  // Number of stars
+  const starVertices = [];
+
+  for (let i = 0; i < starCount; i++) {
+    // Random positions for stars
+    const x = (Math.random() - 0.5) * 2000; // Adjust range for star spread
+    const y = (Math.random() - 0.5) * 2000;
+    const z = (Math.random() - 0.5) * 2000;
+    starVertices.push(x, y, z);
+  }
+
+  starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+
+  // Star material: small white points
+  const starsMaterial = new THREE.PointsMaterial({ color: 0xffffff });
+
+  // Create star points from geometry and material
+  const starField = new THREE.Points(starsGeometry, starsMaterial);
+  scene.add(starField);
+}
+
+// Create the starfield
+createStarfield();
+
+// Set initial camera position and angles
+let cameraDistance = 50;
+let cameraAngleX = 0;
+let cameraAngleY = 0;
+
+// Update camera position based on angles
+function updateCameraState() {
+  camera.position.x = cameraDistance * Math.sin(cameraAngleX) * Math.cos(cameraAngleY);
+  camera.position.z = cameraDistance * Math.cos(cameraAngleX) * Math.cos(cameraAngleY);
+  camera.position.y = cameraDistance * Math.sin(cameraAngleY);
+  camera.lookAt(0, 0, 0);  // Always look at the Sun (center of the scene)
+}
+
+// Initial update for the camera
+updateCameraState();
 
 // Orbit speed for each planet (for simplicity, random values)
 const orbitSpeeds = [0.03, 0.02, 0.01, 0.008, 0.006, 0.004, 0.003, 0.002];
@@ -71,4 +114,26 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
 });
 
+// Handle keyboard input to control the camera with arrow keys
+document.addEventListener('keydown', (event) => {
+  const key = event.key;
+
+  const rotationSpeed = 0.05;  // Adjust speed of rotation
+
+  if (key === 'ArrowLeft') {
+    cameraAngleX -= rotationSpeed;
+  }
+  if (key === 'ArrowRight') {
+    cameraAngleX += rotationSpeed;
+  }
+  if (key === 'ArrowUp') {
+    cameraAngleY = Math.min(cameraAngleY + rotationSpeed, Math.PI / 2); // Limit the vertical angle to avoid flipping
+  }
+  if (key === 'ArrowDown') {
+    cameraAngleY = Math.max(cameraAngleY - rotationSpeed, -Math.PI / 2); // Limit the vertical angle to avoid flipping
+  }
+
+  updateCameraState();  // Update camera position based on new angles
+});
+// Start animation
 animate();
