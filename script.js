@@ -79,7 +79,7 @@ let cameraAngleX = 0;
 let cameraAngleY = 0;
 
 // Update camera position based on angles
-function updateCameraState() {
+function updateCameraPosition() {
   camera.position.x = cameraDistance * Math.sin(cameraAngleX) * Math.cos(cameraAngleY);
   camera.position.z = cameraDistance * Math.cos(cameraAngleX) * Math.cos(cameraAngleY);
   camera.position.y = cameraDistance * Math.sin(cameraAngleY);
@@ -87,7 +87,7 @@ function updateCameraState() {
 }
 
 // Initial update for the camera
-updateCameraState();
+updateCameraPosition();
 
 // Orbit speed for each planet (for simplicity, random values)
 const orbitSpeeds = [0.03, 0.02, 0.01, 0.008, 0.006, 0.004, 0.003, 0.002];
@@ -133,7 +133,21 @@ document.addEventListener('keydown', (event) => {
     cameraAngleY = Math.max(cameraAngleY - rotationSpeed, -Math.PI / 2); // Limit the vertical angle to avoid flipping
   }
 
-  updateCameraState();  // Update camera position based on new angles
+  updateCameraPosition();  // Update camera position based on new angles
+});
+
+document.addEventListener("wheel", (event) => {
+const zoomSpeed = 5;
+
+if (event.deltaY < 0) {
+  // Zoom in
+  cameraDistance = Math.max(10, cameraDistance - zoomSpeed);  // Prevent zooming too close
+} else {
+  // Zoom out
+  cameraDistance = Math.min(200, cameraDistance + zoomSpeed); // Prevent zooming too far
+}
+
+updateCameraPosition();  // Update camera position after zooming
 });
 // Start animation
 animate();
